@@ -43,6 +43,43 @@ body {
   outline-offset: 2px;
 }
 
+
+
+/* ---- scroll reveal: panels swing up out of depth ---- */
+.reveal{opacity:0;transform:perspective(1100px) translate3d(0,48px,-140px) rotateX(16deg);transform-origin:50% 100%;transition:opacity .9s cubic-bezier(.2,.7,.2,1) calc(var(--d,0)*1s),transform 1.2s cubic-bezier(.2,.7,.2,1) calc(var(--d,0)*1s)}
+.reveal[data-in]{opacity:1;transform:none}
+
+/* ---- hero: cursor spotlight + drifting gold dust ---- */
+.spot{position:absolute;inset:0;background:radial-gradient(540px circle at var(--mx,70%) var(--my,40%),rgba(232,198,110,.17),transparent 62%)}
+.dust{position:absolute;border-radius:50%;background:radial-gradient(circle,#fff3c4,#d6b05a 55%,transparent 72%);opacity:0;animation:dust-rise var(--t,14s) linear var(--dl,0s) infinite}
+@keyframes dust-rise{
+  0%{transform:translate3d(0,40px,var(--z,0px)) scale(.6);opacity:0}
+  15%,85%{opacity:var(--o,.7)}
+  100%{transform:translate3d(var(--x,20px),-420px,var(--z,0px)) scale(1.1);opacity:0}
+}
+
+/* ---- 3D ring of scent notes ---- */
+.ring-scene{position:relative;height:110px;perspective:1100px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 82%,transparent)}
+.ring{position:absolute;inset:0;margin:auto;width:190px;transform-style:preserve-3d;animation:ring-spin 38s linear infinite}
+.ring>span{position:absolute;inset:0;display:grid;place-items:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;white-space:nowrap}
+.ring-scene:hover .ring{animation-play-state:paused}
+@keyframes ring-spin{to{transform:rotateY(-360deg)}}
+
+/* ---- gold button: slow light sweep ---- */
+.shine::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 38%,rgba(255,255,255,.6) 50%,transparent 62%);transform:translateX(-130%);animation:shine 6s ease-in-out 1.5s infinite}
+@keyframes shine{0%,55%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+
+/* ---- hero accent line: flowing metallic gold ---- */
+.shimmer-text{background-image:linear-gradient(100deg,#9a7730,#f8e8b0,#d6b05a,#f8e8b0,#9a7730);background-size:250% 100%;animation:flow 7s linear infinite}
+@keyframes flow{to{background-position:-250% 0}}
+
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .dust,.ring,.shine::after,.shimmer-text{animation:none}
+  .dust{opacity:.4}
+}
+@media (scripting:none){.reveal{opacity:1;transform:none}}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
 }

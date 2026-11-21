@@ -5,6 +5,10 @@ import { getTopSellers } from "@/lib/top-sellers";
 import ProductCard from "@/components/ProductCard";
 import Bottle3D from "@/components/Bottle3D";
 import Tilt from "@/components/Tilt";
+import Reveal from "@/components/Reveal";
+import HeroFX from "@/components/HeroFX";
+import Parallax from "@/components/Parallax";
+import NotesRing from "@/components/NotesRing";
 
 const trust = [
   ["100% authentic", "Decanted from sealed, genuine bottles only."],
@@ -33,7 +37,7 @@ const goldText =
 
 // Polished gold button: light on top, deep gold below, soft golden glow
 const goldBtn =
-  "inline-block bg-linear-to-b from-[#f4de96] via-[#cfa94f] to-[#a47f33] px-10 py-4 text-xs font-medium uppercase tracking-[0.3em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,.6),inset_0_-1px_0_rgba(0,0,0,.2),0_12px_28px_-10px_rgba(201,162,77,.65)] transition hover:brightness-110 active:translate-y-px";
+  "relative inline-block overflow-hidden shine bg-linear-to-b from-[#f4de96] via-[#cfa94f] to-[#a47f33] px-10 py-4 text-xs font-medium uppercase tracking-[0.3em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,.6),inset_0_-1px_0_rgba(0,0,0,.2),0_12px_28px_-10px_rgba(201,162,77,.65)] transition hover:brightness-110 active:translate-y-px";
 
 const ghostBtn =
   "inline-block border border-gold/50 px-10 py-4 text-xs uppercase tracking-[0.3em] text-gold-light transition hover:border-gold-light hover:bg-gold/10";
@@ -78,13 +82,14 @@ export default async function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-[radial-gradient(ellipse_at_70%_40%,#2a251d_0%,#141312_60%,#0c0c0b_100%)] text-white">
         <Grain />
+        <HeroFX />
         {/* inner gold frame */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-3 border border-gold/25 sm:inset-6"
         />
-        <div className="relative mx-auto grid max-w-5xl items-center gap-6 px-10 py-8 md:grid-cols-2 md:gap-10 md:py-10">
-          <div>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-6 px-10 py-20 md:grid-cols-2 md:gap-10 md:py-28">
+          <Reveal>
             <div className="flex items-center gap-4">
               <span className="h-px w-10 bg-gold" />
               <p className="text-xs uppercase tracking-[0.4em] text-gold-light">
@@ -93,7 +98,7 @@ export default async function Home() {
             </div>
             <h1 className="mt-5 font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">
               Try the world&apos;s finest scents,{" "}
-              <em className={goldText}>by the drop.</em>
+              <em className={`${goldText} shimmer-text`}>by the drop.</em>
             </h1>
             <p className="mt-5 max-w-md font-light leading-relaxed text-muted-dark">
               Skip the blind buy. Get 2ml, 5ml and 10ml decants of designer and
@@ -107,9 +112,13 @@ export default async function Home() {
                 How it works
               </Link>
             </div>
-          </div>
+          </Reveal>
 
-          <Bottle3D />
+          <Reveal delay={0.3}>
+            <Parallax>
+              <Bottle3D />
+            </Parallax>
+          </Reveal>
         </div>
       </section>
 
@@ -127,6 +136,8 @@ export default async function Home() {
         </div>
       </section>
 
+      <NotesRing />
+
       {/* Categories */}
       <section className="mx-auto max-w-6xl px-5 py-24">
         <p className="text-center text-xs uppercase tracking-[0.4em] text-gold-deep">
@@ -137,8 +148,9 @@ export default async function Home() {
         </h2>
         <Ornament className="mt-6" />
         <div className="mt-14 grid grid-cols-2 gap-5 md:grid-cols-3">
-          {categories.map((c: any) => (
-            <Tilt key={c.id} className="h-full">
+          {categories.map((c: any, i: number) => (
+            <Reveal key={c.id} delay={(i % 3) * 0.12} className="h-full">
+            <Tilt className="h-full">
               <Link
                 href={`/shop?category=${c.id}`}
                 className="group relative block h-full border border-line bg-card p-4 text-center shadow-[inset_0_1px_0_#fff,0_14px_28px_-18px_rgba(0,0,0,.4)] transition hover:border-gold"
@@ -166,6 +178,7 @@ export default async function Home() {
                 <h3 className="mt-5 font-display text-2xl">{c.name}</h3>
               </Link>
             </Tilt>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -185,10 +198,12 @@ export default async function Home() {
           <p className="text-muted">New fragrances arriving soon.</p>
         ) : (
           <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-            {topSellers.map((p: any) => (
-              <Tilt key={p.id} className="h-full">
-                <ProductCard p={p} />
-              </Tilt>
+            {topSellers.map((p: any, i: number) => (
+              <Reveal key={p.id} delay={(i % 4) * 0.1} className="h-full">
+                <Tilt className="h-full">
+                  <ProductCard p={p} />
+                </Tilt>
+              </Reveal>
             ))}
           </div>
         )}
@@ -207,8 +222,9 @@ export default async function Home() {
             before you commit to a full bottle.
           </p>
           <div className="mt-14 grid gap-6 md:grid-cols-3">
-            {sizes.map(([ml, name, desc]) => (
-              <Tilt key={ml} max={9}>
+            {sizes.map(([ml, name, desc], i) => (
+              <Reveal key={ml} delay={i * 0.14}>
+              <Tilt max={9}>
                 <div className="border border-gold/30 bg-linear-to-b from-white/[0.07] to-white/[0.01] p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.10),0_30px_50px_-28px_rgba(0,0,0,.9)] transition hover:border-gold">
                   <p className={`font-display text-6xl ${goldText}`}>{ml}</p>
                   <h3 className="mt-4 text-xs uppercase tracking-[0.3em] text-gold-light">
@@ -219,6 +235,7 @@ export default async function Home() {
                   </p>
                 </div>
               </Tilt>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -231,14 +248,14 @@ export default async function Home() {
         </h2>
         <Ornament className="mt-6" />
         <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map(([n, t, d]) => (
-            <div key={n} className="text-center">
+          {steps.map(([n, t, d], i) => (
+            <Reveal key={n} delay={i * 0.12} className="text-center">
               <p className={`font-display text-5xl ${goldText}`}>{n}</p>
               <h3 className="mt-4 font-display text-xl">{t}</h3>
               <p className="mx-auto mt-2 max-w-[14rem] text-sm font-light leading-relaxed text-muted">
                 {d}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </section>

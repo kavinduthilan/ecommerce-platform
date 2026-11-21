@@ -25,13 +25,45 @@ const steps = [
   ["04", "Delivered to you", "Carefully packed and sent to your door."],
 ];
 
-// Stacked text-shadow = extruded 3D numerals
-const extrude =
-  "[text-shadow:1px_1px_0_rgba(0,0,0,.14),2px_2px_0_rgba(0,0,0,.12),3px_3px_0_rgba(0,0,0,.10),4px_4px_0_rgba(0,0,0,.08),6px_10px_14px_rgba(0,0,0,.22)]";
+/* ---------- luxury building blocks ---------- */
 
-// Chunky "physical" gold button: darker underside that presses down on click
-const button3d =
-  "bg-gold px-8 py-4 text-xs uppercase tracking-[0.25em] text-ink shadow-[0_5px_0_#7d6428,0_14px_22px_-6px_rgba(0,0,0,.55)] transition hover:bg-gold-light active:translate-y-[3px] active:shadow-[0_2px_0_#7d6428,0_6px_10px_-4px_rgba(0,0,0,.55)]";
+// Metallic gold lettering with a soft lift underneath
+const goldText =
+  "bg-linear-to-b from-[#f8e8b0] via-[#d6b05a] to-[#9a7730] bg-clip-text text-transparent drop-shadow-[0_3px_4px_rgba(0,0,0,.35)]";
+
+// Polished gold button: light on top, deep gold below, soft golden glow
+const goldBtn =
+  "inline-block bg-linear-to-b from-[#f4de96] via-[#cfa94f] to-[#a47f33] px-10 py-4 text-xs font-medium uppercase tracking-[0.3em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,.6),inset_0_-1px_0_rgba(0,0,0,.2),0_12px_28px_-10px_rgba(201,162,77,.65)] transition hover:brightness-110 active:translate-y-px";
+
+const ghostBtn =
+  "inline-block border border-gold/50 px-10 py-4 text-xs uppercase tracking-[0.3em] text-gold-light transition hover:border-gold-light hover:bg-gold/10";
+
+// Film grain so the dark sections feel like matte black stock, not flat screen
+const grain =
+  "url(\"data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+function Grain() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay"
+      style={{ backgroundImage: grain }}
+    />
+  );
+}
+
+function Ornament({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`flex items-center justify-center gap-3 ${className}`}
+    >
+      <span className="h-px w-16 bg-linear-to-r from-transparent to-gold" />
+      <span className="h-1.5 w-1.5 rotate-45 bg-gold" />
+      <span className="h-px w-16 bg-linear-to-l from-transparent to-gold" />
+    </div>
+  );
+}
 
 export default async function Home() {
   const [categories, topSellers] = await Promise.all([
@@ -44,28 +76,34 @@ export default async function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="overflow-hidden bg-ink text-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:py-28">
+      <section className="relative overflow-hidden bg-[radial-gradient(ellipse_at_70%_40%,#2a251d_0%,#141312_60%,#0c0c0b_100%)] text-white">
+        <Grain />
+        {/* inner gold frame */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-3 border border-gold/25 sm:inset-6"
+        />
+        <div className="relative mx-auto grid max-w-5xl items-center gap-6 px-10 py-8 md:grid-cols-2 md:gap-10 md:py-10">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-gold-light">
-              Authentic fragrance decants
-            </p>
-            <h1 className="mt-6 font-display text-5xl leading-[1.05] sm:text-7xl">
+            <div className="flex items-center gap-4">
+              <span className="h-px w-10 bg-gold" />
+              <p className="text-xs uppercase tracking-[0.4em] text-gold-light">
+                Authentic fragrance decants
+              </p>
+            </div>
+            <h1 className="mt-5 font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">
               Try the world&apos;s finest scents,{" "}
-              <em className="text-gold-light">by the drop.</em>
+              <em className={goldText}>by the drop.</em>
             </h1>
-            <p className="mt-6 max-w-md font-light text-muted-dark">
+            <p className="mt-5 max-w-md font-light leading-relaxed text-muted-dark">
               Skip the blind buy. Get 2ml, 5ml and 10ml decants of designer and
               niche perfumes, filled from genuine bottles.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="/shop" className={button3d}>
+            <div className="mt-7 flex flex-wrap gap-4">
+              <Link href="/shop" className={goldBtn}>
                 Shop decants
               </Link>
-              <Link
-                href="#how-it-works"
-                className="border border-white/30 px-8 py-4 text-xs uppercase tracking-[0.25em] transition hover:border-gold-light"
-              >
+              <Link href="#how-it-works" className={ghostBtn}>
                 How it works
               </Link>
             </div>
@@ -76,40 +114,48 @@ export default async function Home() {
       </section>
 
       {/* Trust bar */}
-      <section className="border-b border-line bg-card shadow-[0_18px_30px_-24px_rgba(0,0,0,.35)]">
-        <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 text-center md:grid-cols-3">
+      <section className="border-b border-line bg-card">
+        <div className="mx-auto grid max-w-6xl px-5 py-12 text-center md:grid-cols-3 md:divide-x md:divide-line">
           {trust.map(([t, d]) => (
-            <div key={t}>
+            <div key={t} className="px-8 py-4 md:py-0">
               <h3 className="font-display text-xl">{t}</h3>
-              <p className="mt-1 text-sm font-light text-muted">{d}</p>
+              <p className="mx-auto mt-2 max-w-[16rem] text-sm font-light leading-relaxed text-muted">
+                {d}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Categories */}
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <p className="text-center text-xs uppercase tracking-[0.3em] text-gold-deep">
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <p className="text-center text-xs uppercase tracking-[0.4em] text-gold-deep">
           Find your scent
         </p>
-        <h2 className="mt-3 text-center font-display text-4xl">
+        <h2 className="mt-4 text-center font-display text-4xl sm:text-5xl">
           Shop by category
         </h2>
-        <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3">
+        <Ornament className="mt-6" />
+        <div className="mt-14 grid grid-cols-2 gap-5 md:grid-cols-3">
           {categories.map((c: any) => (
             <Tilt key={c.id} className="h-full">
               <Link
                 href={`/shop?category=${c.id}`}
-                className="group block h-full border border-line bg-card p-4 text-center shadow-[inset_0_1px_0_#fff,0_10px_20px_-14px_rgba(0,0,0,.35)] transition hover:border-gold"
+                className="group relative block h-full border border-line bg-card p-4 text-center shadow-[inset_0_1px_0_#fff,0_14px_28px_-18px_rgba(0,0,0,.4)] transition hover:border-gold"
               >
-                <div className="relative aspect-square w-full overflow-hidden bg-line/40 shadow-[inset_0_2px_8px_rgba(0,0,0,.18)]">
+                {/* gold hairline along the top edge */}
+                <span
+                  aria-hidden
+                  className="absolute inset-x-6 top-0 h-px bg-linear-to-r from-transparent via-gold to-transparent opacity-0 transition group-hover:opacity-100"
+                />
+                <div className="relative aspect-square w-full overflow-hidden bg-line/40 shadow-[inset_0_2px_10px_rgba(0,0,0,.2)]">
                   {c.imageUrl ? (
                     <Image
                       src={`${process.env.API_URL}${c.imageUrl}`}
                       alt={c.name}
                       fill
                       sizes="(min-width: 768px) 25vw, 50vw"
-                      className="object-cover transition duration-500 group-hover:scale-105"
+                      className="object-cover transition duration-700 group-hover:scale-105"
                     />
                   ) : (
                     <div className="grid h-full place-items-center text-xs uppercase tracking-[0.15em] text-muted">
@@ -117,7 +163,7 @@ export default async function Home() {
                     </div>
                   )}
                 </div>
-                <h3 className="mt-4 font-display text-2xl">{c.name}</h3>
+                <h3 className="mt-5 font-display text-2xl">{c.name}</h3>
               </Link>
             </Tilt>
           ))}
@@ -125,12 +171,12 @@ export default async function Home() {
       </section>
 
       {/* Featured */}
-      <section className="mx-auto max-w-6xl px-5 pb-20">
-        <div className="mb-10 flex items-end justify-between">
-          <h2 className="font-display text-4xl">Top Sellers</h2>
+      <section className="mx-auto max-w-6xl px-5 pb-24">
+        <div className="mb-12 flex items-end justify-between border-b border-line pb-5">
+          <h2 className="font-display text-4xl sm:text-5xl">Top Sellers</h2>
           <Link
             href="/shop"
-            className="text-xs uppercase tracking-[0.2em] text-gold-deep hover:underline"
+            className="text-xs uppercase tracking-[0.25em] text-gold-deep hover:underline"
           >
             View all
           </Link>
@@ -148,27 +194,29 @@ export default async function Home() {
         )}
       </section>
 
-      {/* Sizes */}
-      <section className="border-y border-line bg-card">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <h2 className="text-center font-display text-4xl">
+      {/* Sizes (dark, jewellery-box feel) */}
+      <section className="relative overflow-hidden bg-[radial-gradient(ellipse_at_50%_0%,#26221b_0%,#141312_70%)] text-white">
+        <Grain />
+        <div className="relative mx-auto max-w-6xl px-5 py-24">
+          <h2 className="text-center font-display text-4xl sm:text-5xl">
             Choose your size
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-center text-sm font-light text-muted">
+          <Ornament className="mt-6" />
+          <p className="mx-auto mt-6 max-w-md text-center text-sm font-light leading-relaxed text-muted-dark">
             Every fragrance is available in three sizes, so you can wear it
             before you commit to a full bottle.
           </p>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
             {sizes.map(([ml, name, desc]) => (
               <Tilt key={ml} max={9}>
-                <div className="border border-line bg-white p-8 text-center shadow-[inset_0_1px_0_#fff,0_14px_24px_-16px_rgba(0,0,0,.35)] transition hover:border-gold">
-                  <p className={`font-display text-5xl text-gold-deep ${extrude}`}>
-                    {ml}
-                  </p>
-                  <h3 className="mt-3 text-xs uppercase tracking-[0.25em]">
+                <div className="border border-gold/30 bg-linear-to-b from-white/[0.07] to-white/[0.01] p-10 text-center shadow-[inset_0_1px_0_rgba(255,255,255,.10),0_30px_50px_-28px_rgba(0,0,0,.9)] transition hover:border-gold">
+                  <p className={`font-display text-6xl ${goldText}`}>{ml}</p>
+                  <h3 className="mt-4 text-xs uppercase tracking-[0.3em] text-gold-light">
                     {name}
                   </h3>
-                  <p className="mt-3 text-sm font-light text-muted">{desc}</p>
+                  <p className="mx-auto mt-4 max-w-[15rem] text-sm font-light leading-relaxed text-muted-dark">
+                    {desc}
+                  </p>
                 </div>
               </Tilt>
             ))}
@@ -177,31 +225,40 @@ export default async function Home() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="mx-auto max-w-6xl px-5 py-20">
-        <h2 className="text-center font-display text-4xl">How it works</h2>
-        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <section id="how-it-works" className="mx-auto max-w-6xl px-5 py-24">
+        <h2 className="text-center font-display text-4xl sm:text-5xl">
+          How it works
+        </h2>
+        <Ornament className="mt-6" />
+        <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map(([n, t, d]) => (
             <div key={n} className="text-center">
-              <p className={`font-display text-4xl text-gold ${extrude}`}>{n}</p>
-              <h3 className="mt-3 font-display text-xl">{t}</h3>
-              <p className="mt-2 text-sm font-light text-muted">{d}</p>
+              <p className={`font-display text-5xl ${goldText}`}>{n}</p>
+              <h3 className="mt-4 font-display text-xl">{t}</h3>
+              <p className="mx-auto mt-2 max-w-[14rem] text-sm font-light leading-relaxed text-muted">
+                {d}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="bg-ink text-white">
-        <div className="mx-auto max-w-3xl px-5 py-16 text-center">
-          <h2 className="font-display text-4xl">Not sure what to pick?</h2>
-          <p className="mt-4 font-light text-muted-dark">
+      <section className="relative overflow-hidden bg-[radial-gradient(ellipse_at_50%_100%,#2a251d_0%,#141312_70%)] text-white">
+        <Grain />
+        <div className="relative mx-auto max-w-3xl px-5 py-20 text-center">
+          <Ornament />
+          <h2 className="mt-8 font-display text-4xl sm:text-5xl">
+            Not sure what to pick?
+          </h2>
+          <p className="mt-5 font-light leading-relaxed text-muted-dark">
             Tell us the scents you love and we&apos;ll recommend a few to try.
           </p>
           <a
             href={whatsapp}
             target="_blank"
             rel="noopener noreferrer"
-            className={`mt-8 inline-block ${button3d}`}
+            className={`mt-10 ${goldBtn}`}
           >
             Chat on WhatsApp
           </a>

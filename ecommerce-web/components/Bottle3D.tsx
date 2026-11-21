@@ -54,44 +54,64 @@ function Box({
   );
 }
 
+/** Thin, clear crystal with a beveled inner edge. */
 const glass = (n: FaceName): CSSProperties => {
-  const sheen =
+  const bg =
     n === "front" || n === "back"
-      ? "linear-gradient(115deg, rgba(255,255,255,.30) 0%, rgba(255,255,255,.05) 35%, rgba(255,255,255,.02) 60%, rgba(255,255,255,.16) 100%)"
+      ? "linear-gradient(112deg, rgba(255,255,255,.26) 0%, rgba(255,255,255,.04) 30%, rgba(255,255,255,.015) 62%, rgba(255,255,255,.14) 100%)"
       : n === "top" || n === "bottom"
-        ? "rgba(255,255,255,.10)"
-        : "linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05))";
+        ? "rgba(255,255,255,.09)"
+        : "linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.04))";
   return {
-    background: sheen,
-    border: "1px solid rgba(255,255,255,.28)",
-    boxShadow: "inset 0 0 22px rgba(255,255,255,.10)",
-    borderRadius: 6,
+    background: bg,
+    border: "1px solid rgba(255,255,255,.30)",
+    boxShadow: "inset 0 0 26px rgba(255,255,255,.10)",
+    outline: "1px solid rgba(255,255,255,.07)",
+    outlineOffset: -7,
+    borderRadius: 4,
   };
 };
 
+/** Heavy glass base, a touch brighter, like real flacon bottoms. */
+const glassBase = (n: FaceName): CSSProperties => ({
+  background:
+    n === "top" || n === "bottom"
+      ? "rgba(255,255,255,.18)"
+      : "linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08))",
+  border: "1px solid rgba(255,255,255,.22)",
+});
+
+/** Perfume: champagne gold, lit differently on each side. */
 const liquid = (n: FaceName): CSSProperties => {
   const tone: Record<FaceName, string> = {
-    front: "linear-gradient(180deg,#f0d28a,#c9a24d)",
-    back: "linear-gradient(180deg,#b88f3e,#8f6c26)",
-    left: "linear-gradient(180deg,#d9b563,#a67e30)",
-    right: "linear-gradient(180deg,#e6c673,#b58a38)",
-    top: "#f7e1a6",
-    bottom: "#7a5b1e",
+    front: "linear-gradient(180deg,#f6e3a8,#d6b05a 55%,#b88f3e)",
+    back: "linear-gradient(180deg,#b88f3e,#8a6a26)",
+    left: "linear-gradient(180deg,#dcb966,#a67e30)",
+    right: "linear-gradient(180deg,#ecd08a,#bf9440)",
+    top: "radial-gradient(circle at 35% 35%,#fff3c9,#e7c673)",
+    bottom: "#6f521a",
   };
-  return { background: tone[n], opacity: 0.78 };
+  return { background: tone[n], opacity: 0.8 };
 };
 
-const metal = (n: FaceName): CSSProperties => {
-  const tone: Record<FaceName, string> = {
-    front: "linear-gradient(90deg,#8c6c2a,#e8cb83 45%,#a8843a)",
-    back: "linear-gradient(90deg,#6f531c,#b8944a)",
-    left: "linear-gradient(90deg,#7b5d22,#a8843a)",
-    right: "linear-gradient(90deg,#c9a24d,#f2dc9a)",
-    top: "radial-gradient(circle at 40% 40%,#f6e3a8,#b8944a)",
-    bottom: "#5c4416",
+/** Brushed gold. `knurl` adds fine vertical grooves like a luxury cap. */
+const metal =
+  (knurl: boolean) =>
+  (n: FaceName): CSSProperties => {
+    const tone: Record<FaceName, string> = {
+      front: "linear-gradient(90deg,#7a5c22,#f1d98f 42%,#b38d3c 70%,#8c6c2a)",
+      back: "linear-gradient(90deg,#5f4517,#a98532)",
+      left: "linear-gradient(90deg,#6e5320,#b38d3c)",
+      right: "linear-gradient(90deg,#d0aa55,#f8e8b0 55%,#c29a42)",
+      top: "radial-gradient(circle at 38% 38%,#fff1c2,#c9a24d 60%,#8f6c26)",
+      bottom: "#4f3a12",
+    };
+    const grooves =
+      knurl && n !== "top" && n !== "bottom"
+        ? "repeating-linear-gradient(90deg, rgba(0,0,0,.22) 0 1px, transparent 1px 5px), "
+        : "";
+    return { background: `${grooves}${tone[n]}`, borderRadius: 2 };
   };
-  return { background: tone[n], borderRadius: 3 };
-};
 
 export default function Bottle3D() {
   const scene = useRef<HTMLDivElement>(null);
@@ -103,10 +123,11 @@ export default function Bottle3D() {
     if (!sceneEl || !el) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const base = reduce ? 0 : 0.3;
-    let angle = -28;
-    let tilt = -8;
-    let targetTilt = -8;
+    const base = reduce ? 0 : 0.18; // slow, unhurried turn
+    const REST_TILT = -12;
+    let angle = -30;
+    let tilt = REST_TILT;
+    let targetTilt = REST_TILT;
     let speed = base;
     let dragging = false;
     let lastX = 0;
@@ -119,9 +140,9 @@ export default function Bottle3D() {
     const tick = () => {
       if (!dragging) {
         angle += speed;
-        speed += (base - speed) * 0.03;
+        speed += (base - speed) * 0.025;
       }
-      tilt += (targetTilt - tilt) * 0.08;
+      tilt += (targetTilt - tilt) * 0.07;
       draw();
       raf = requestAnimationFrame(tick);
     };
@@ -133,18 +154,18 @@ export default function Bottle3D() {
     };
     const move = (e: PointerEvent) => {
       const r = sceneEl.getBoundingClientRect();
-      targetTilt = -8 + ((e.clientY - r.top) / r.height - 0.5) * -14;
+      targetTilt = REST_TILT + ((e.clientY - r.top) / r.height - 0.5) * -12;
       if (!dragging) return;
       const dx = e.clientX - lastX;
       lastX = e.clientX;
-      angle += dx * 0.6;
-      speed = dx * 0.6;
+      angle += dx * 0.55;
+      speed = dx * 0.55;
     };
     const up = () => {
       dragging = false;
     };
     const leave = () => {
-      targetTilt = -8;
+      targetTilt = REST_TILT;
     };
 
     sceneEl.addEventListener("pointerdown", down);
@@ -167,26 +188,24 @@ export default function Bottle3D() {
   }, []);
 
   return (
-    <div className="relative mx-auto w-full max-w-md select-none">
-      {/* spotlight */}
+    <div className="relative mx-auto w-full max-w-sm select-none">
+      {/* warm spotlight */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-0 bg-[radial-gradient(circle_at_50%_42%,rgba(201,162,77,.28),transparent_62%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(214,176,90,.30),rgba(214,176,90,.06)_45%,transparent_70%)]"
       />
 
       <div
         ref={scene}
         aria-hidden
-        className="relative mx-auto h-[400px] w-full cursor-grab touch-pan-y active:cursor-grabbing"
-        style={{ perspective: 1100 }}
+        className="relative mx-auto h-[300px] w-full cursor-grab touch-pan-y active:cursor-grabbing"
+        style={{ perspective: 1200 }}
       >
-        {/* floor shadow (stays flat while the bottle turns) */}
-        <div
-          className="absolute bottom-[34px] left-1/2 h-8 w-56 -translate-x-1/2 rounded-full bg-black/60 blur-xl"
-        />
+        {/* contact shadow */}
+        <div className="absolute left-1/2 top-[232px] h-7 w-48 -translate-x-1/2 rounded-full bg-black/70 blur-xl" />
 
         <div
-          className="absolute left-0 top-[26px] h-[340px] w-full"
+          className="absolute left-0 top-[8px] h-[340px] w-full origin-top scale-[0.76]"
           style={{ transformStyle: "preserve-3d" }}
         >
           <div
@@ -194,32 +213,94 @@ export default function Bottle3D() {
             className="absolute inset-0 will-change-transform"
             style={{ transformStyle: "preserve-3d" }}
           >
+            {/* pedestal rings on the floor */}
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: 308,
+                width: 320,
+                height: 320,
+                marginLeft: -160,
+                marginTop: -160,
+                borderRadius: "50%",
+                transform: "rotateX(90deg)",
+                border: "1px solid rgba(214,176,90,.55)",
+                background:
+                  "radial-gradient(circle, rgba(214,176,90,.22), rgba(214,176,90,.04) 60%, transparent 70%)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: 308,
+                width: 230,
+                height: 230,
+                marginLeft: -115,
+                marginTop: -115,
+                borderRadius: "50%",
+                transform: "rotateX(90deg)",
+                border: "1px solid rgba(214,176,90,.30)",
+              }}
+            />
+
             {/* cap */}
-            <Box w={50} d={50} h={50} top={4} face={metal} />
+            <Box w={56} d={56} h={54} top={0} face={metal(true)} />
             {/* neck */}
-            <Box w={30} d={30} h={22} top={54} face={metal} />
-            {/* glass body */}
+            <Box w={28} d={28} h={22} top={52} face={metal(false)} />
+            {/* gold collar */}
+            <Box w={50} d={50} h={12} top={70} face={metal(false)} />
+
+            {/* crystal body */}
             <Box
               w={150}
               d={100}
-              h={232}
-              top={76}
+              h={226}
+              top={82}
               face={glass}
               front={
-                <div className="absolute inset-x-6 top-[88px] grid h-[64px] place-items-center border border-[#e8cb83]/70 bg-[#171717]/85 text-center">
-                  <span className="font-display text-[15px] uppercase tracking-[0.35em] text-[#f0d28a]">
-                    Decant
-                  </span>
-                </div>
+                <>
+                  {/* specular streak */}
+                  <div
+                    className="absolute bottom-6 left-3 top-6 w-2 blur-[2px]"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, transparent, rgba(255,255,255,.6) 20%, rgba(255,255,255,.15) 80%, transparent)",
+                    }}
+                  />
+                  {/* gold foil label */}
+                  <div
+                    className="absolute inset-x-6 top-[78px] h-[76px] p-[3px]"
+                    style={{
+                      background:
+                        "linear-gradient(135deg,#f8e8b0,#cfa94f 45%,#8f6c26)",
+                      boxShadow: "0 6px 14px rgba(0,0,0,.35)",
+                    }}
+                  >
+                    <div className="grid h-full place-items-center border border-[#171717]/70 bg-[#171717]/90">
+                      <div className="text-center">
+                        <p className="font-display text-[15px] uppercase tracking-[0.4em] text-[#f1d98f]">
+                          Decant
+                        </p>
+                        <p className="mt-1 text-[7px] uppercase tracking-[0.35em] text-[#f1d98f]/70">
+                          Fine fragrance
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
               }
             />
-            {/* perfume inside the glass */}
-            <Box w={136} d={86} h={158} top={142} face={liquid} />
+            {/* heavy glass base */}
+            <Box w={146} d={96} h={28} top={278} face={glassBase} />
+            {/* perfume */}
+            <Box w={134} d={84} h={146} top={132} face={liquid} />
           </div>
         </div>
       </div>
 
-      <p className="relative -mt-2 text-center text-[10px] uppercase tracking-[0.3em] text-muted-dark">
+      <p className="relative -mt-1 text-center text-[10px] uppercase tracking-[0.35em] text-muted-dark">
         Drag to rotate
       </p>
     </div>

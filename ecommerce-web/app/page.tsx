@@ -3,6 +3,8 @@ import Image from "next/image";
 import { getCategories } from "@/lib/categories";
 import { getTopSellers } from "@/lib/top-sellers";
 import ProductCard from "@/components/ProductCard";
+import Bottle3D from "@/components/Bottle3D";
+import Tilt from "@/components/Tilt";
 
 const trust = [
   ["100% authentic", "Decanted from sealed, genuine bottles only."],
@@ -23,22 +25,18 @@ const steps = [
   ["04", "Delivered to you", "Carefully packed and sent to your door."],
 ];
 
-function Bottle() {
-  return (
-    <svg viewBox="0 0 200 280" fill="none" className="h-full w-full" aria-hidden>
-      <rect x="82" y="14" width="36" height="34" rx="4" stroke="currentColor" strokeWidth="2" />
-      <rect x="92" y="48" width="16" height="16" stroke="currentColor" strokeWidth="2" />
-      <rect x="40" y="64" width="120" height="196" rx="14" stroke="currentColor" strokeWidth="2" />
-      <path d="M44 150c24-10 48 10 76 0s32-8 36-2v98a10 10 0 0 1-10 10H54a10 10 0 0 1-10-10z" fill="currentColor" opacity=".18" />
-      <path d="M58 84v150" stroke="currentColor" strokeWidth="2" opacity=".35" strokeLinecap="round" />
-    </svg>
-  );
-}
+// Stacked text-shadow = extruded 3D numerals
+const extrude =
+  "[text-shadow:1px_1px_0_rgba(0,0,0,.14),2px_2px_0_rgba(0,0,0,.12),3px_3px_0_rgba(0,0,0,.10),4px_4px_0_rgba(0,0,0,.08),6px_10px_14px_rgba(0,0,0,.22)]";
+
+// Chunky "physical" gold button: darker underside that presses down on click
+const button3d =
+  "bg-gold px-8 py-4 text-xs uppercase tracking-[0.25em] text-ink shadow-[0_5px_0_#7d6428,0_14px_22px_-6px_rgba(0,0,0,.55)] transition hover:bg-gold-light active:translate-y-[3px] active:shadow-[0_2px_0_#7d6428,0_6px_10px_-4px_rgba(0,0,0,.55)]";
 
 export default async function Home() {
   const [categories, topSellers] = await Promise.all([
     getCategories(),
-    getTopSellers()
+    getTopSellers(),
   ]);
 
   const whatsapp = "https://wa.me/94XXXXXXXXX"; // replace with your number
@@ -46,7 +44,7 @@ export default async function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-ink text-white">
+      <section className="overflow-hidden bg-ink text-white">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 md:grid-cols-2 md:py-28">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-gold-light">
@@ -61,10 +59,7 @@ export default async function Home() {
               niche perfumes, filled from genuine bottles.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link
-                href="/shop"
-                className="bg-gold px-8 py-4 text-xs uppercase tracking-[0.25em] text-ink transition hover:bg-gold-light"
-              >
+              <Link href="/shop" className={button3d}>
                 Shop decants
               </Link>
               <Link
@@ -76,19 +71,12 @@ export default async function Home() {
             </div>
           </div>
 
-          <div
-            aria-hidden
-            className="grid aspect-[5/5] place-items-center border border-gold/40 bg-linear-to-br from-[#262320] to-[#171717]"
-          >
-            <div className="h-3/5 text-gold">
-              <Bottle />
-            </div>
-          </div>
+          <Bottle3D />
         </div>
       </section>
 
       {/* Trust bar */}
-      <section className="border-b border-line bg-card">
+      <section className="border-b border-line bg-card shadow-[0_18px_30px_-24px_rgba(0,0,0,.35)]">
         <div className="mx-auto grid max-w-6xl gap-8 px-5 py-10 text-center md:grid-cols-3">
           {trust.map(([t, d]) => (
             <div key={t}>
@@ -108,29 +96,30 @@ export default async function Home() {
           Shop by category
         </h2>
         <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3">
-          {categories.map((c:any) => (
-            <Link
-              key={c.id}
-              href={`/shop?category=${c.id}`}
-              className="group border border-line bg-card p-4 text-center transition hover:border-gold"
-            >
-              <div className="relative aspect-square w-full overflow-hidden bg-line/40">
-                {c.imageUrl ? (
-                  <Image
-                    src={`${process.env.API_URL}${c.imageUrl}`}
-                    alt={c.name}
-                    fill
-                    sizes="(min-width: 768px) 25vw, 50vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="grid h-full place-items-center text-xs uppercase tracking-[0.15em] text-muted">
-                    No image
-                  </div>
-                )}
-              </div>
-              <h3 className="mt-4 font-display text-2xl">{c.name}</h3>
-            </Link>
+          {categories.map((c: any) => (
+            <Tilt key={c.id} className="h-full">
+              <Link
+                href={`/shop?category=${c.id}`}
+                className="group block h-full border border-line bg-card p-4 text-center shadow-[inset_0_1px_0_#fff,0_10px_20px_-14px_rgba(0,0,0,.35)] transition hover:border-gold"
+              >
+                <div className="relative aspect-square w-full overflow-hidden bg-line/40 shadow-[inset_0_2px_8px_rgba(0,0,0,.18)]">
+                  {c.imageUrl ? (
+                    <Image
+                      src={`${process.env.API_URL}${c.imageUrl}`}
+                      alt={c.name}
+                      fill
+                      sizes="(min-width: 768px) 25vw, 50vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center text-xs uppercase tracking-[0.15em] text-muted">
+                      No image
+                    </div>
+                  )}
+                </div>
+                <h3 className="mt-4 font-display text-2xl">{c.name}</h3>
+              </Link>
+            </Tilt>
           ))}
         </div>
       </section>
@@ -151,7 +140,9 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
             {topSellers.map((p: any) => (
-              <ProductCard key={p.id} p={p} />
+              <Tilt key={p.id} className="h-full">
+                <ProductCard p={p} />
+              </Tilt>
             ))}
           </div>
         )}
@@ -169,16 +160,17 @@ export default async function Home() {
           </p>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {sizes.map(([ml, name, desc]) => (
-              <div
-                key={ml}
-                className="border border-line bg-white p-8 text-center transition hover:border-gold"
-              >
-                <p className="font-display text-5xl text-gold-deep">{ml}</p>
-                <h3 className="mt-3 text-xs uppercase tracking-[0.25em]">
-                  {name}
-                </h3>
-                <p className="mt-3 text-sm font-light text-muted">{desc}</p>
-              </div>
+              <Tilt key={ml} max={9}>
+                <div className="border border-line bg-white p-8 text-center shadow-[inset_0_1px_0_#fff,0_14px_24px_-16px_rgba(0,0,0,.35)] transition hover:border-gold">
+                  <p className={`font-display text-5xl text-gold-deep ${extrude}`}>
+                    {ml}
+                  </p>
+                  <h3 className="mt-3 text-xs uppercase tracking-[0.25em]">
+                    {name}
+                  </h3>
+                  <p className="mt-3 text-sm font-light text-muted">{desc}</p>
+                </div>
+              </Tilt>
             ))}
           </div>
         </div>
@@ -190,7 +182,7 @@ export default async function Home() {
         <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map(([n, t, d]) => (
             <div key={n} className="text-center">
-              <p className="font-display text-4xl text-gold">{n}</p>
+              <p className={`font-display text-4xl text-gold ${extrude}`}>{n}</p>
               <h3 className="mt-3 font-display text-xl">{t}</h3>
               <p className="mt-2 text-sm font-light text-muted">{d}</p>
             </div>
@@ -201,9 +193,7 @@ export default async function Home() {
       {/* CTA */}
       <section className="bg-ink text-white">
         <div className="mx-auto max-w-3xl px-5 py-16 text-center">
-          <h2 className="font-display text-4xl">
-            Not sure what to pick?
-          </h2>
+          <h2 className="font-display text-4xl">Not sure what to pick?</h2>
           <p className="mt-4 font-light text-muted-dark">
             Tell us the scents you love and we&apos;ll recommend a few to try.
           </p>
@@ -211,7 +201,7 @@ export default async function Home() {
             href={whatsapp}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-8 inline-block bg-gold px-8 py-4 text-xs uppercase tracking-[0.25em] text-ink transition hover:bg-gold-light"
+            className={`mt-8 inline-block ${button3d}`}
           >
             Chat on WhatsApp
           </a>

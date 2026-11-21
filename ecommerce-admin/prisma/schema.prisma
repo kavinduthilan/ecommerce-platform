@@ -1,0 +1,307 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  status Status @default(Active)
+  createdAt DateTime @default(now())
+
+  categories Category[]
+  brands Brand[]
+  products Product[]
+  sizes Size[]
+  stockMoves StockMove[]
+  sessions Session[]
+  accounts Account[]
+  systemMenuPermissions SystemMenuPermission[]
+  systemMenuSectionPermissions SystemMenuSectionPermission[] 
+  productVariants ProductVariant[]
+  inventory Inventory[]
+
+  @@map("users")
+}
+
+model Account {
+  id                Int  @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           Int   @id @default(autoincrement())
+  sessionToken String   @unique
+  userId       Int
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String
+  imageUrl    String?
+  status Status  @default(Active)
+  createdById Int
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id Int @id @default(autoincrement())
+  name String
+  status Status  @default(Active)
+  createdById Int
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  products Product[]
+
+  @@map("brands")
+}
+
+model Size {
+  id Int @id @default(autoincrement())
+  name String
+  status Status  @default(Active)
+  createdById Int
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  productVariants ProductVariant[]
+
+  @@map("sizes")
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String
+  description String @db.Text
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  brandId Int
+  brand Brand  @relation(fields: [brandId], references: [id])
+  imageUrl String?
+  status Status @default(Active)
+  createdById Int
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  productVariants ProductVariant[]
+
+  @@map("products")
+
+}
+
+model ProductVariant{
+  id Int @id @default(autoincrement())
+  name String
+  productId Int
+  sku String
+  price       Decimal  @db.Decimal(10, 2)
+  costPrice   Decimal  @db.Decimal(10, 2)
+  sizeId Int?
+  status Status @default(Active)
+  createdById Int
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  size Size? @relation(fields: [sizeId], references: [id])
+
+  inventory Inventory[]
+  orderItems OrderItem[]
+
+  @@map("product_variants")
+  @@index([productId])
+}
+
+model Inventory{
+  id Int @id @default(autoincrement())
+  productVariantId Int
+  quantity Int
+  reversedQuantity Int
+  availableQuantity Int
+  reorderLevel Int
+  status    Status   @default(Active)
+  createdById Int
+  createdBy User @relation(fields: [createdById], references: [id])
+  createdAt DateTime @default(now())
+
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id])
+  stockMoves StockMove[]
+
+  @@map("inventory")
+}
+
+enum StockMoveType {
+  IN
+  OUT
+  ADJUSTMENT
+  RETURN
+}
+
+model StockMove {
+  id                Int           @id @default(autoincrement())
+  inventoryId       Int
+  type              StockMoveType
+  quantity          Int
+  reason            String?
+  referenceId       Int?
+  createdById       Int
+  createdBy         User          @relation(fields: [createdById], references: [id])
+  createdAt         DateTime      @default(now())
+
+  inventory         Inventory     @relation(fields: [inventoryId], references: [id])
+
+  @@map("stock_moves")
+  @@index([inventoryId])
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String  @unique
+  phone       Int 
+  address     String
+  status    Status   @default(Active)
+  createdAt   DateTime @default(now())
+
+  orders      Order[]
+
+  @@map("customers")
+}
+
+ enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  REFUNDED
+}
+
+enum Status {
+  Active
+  Deactivated
+}
+
+
+model Order {
+  id             Int           @id @default(autoincrement())
+  orderNumber    String        @unique
+  customerId     Int
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  status         OrderStatus   @default(PENDING)
+  paymentStatus  PaymentStatus @default(UNPAID)
+  totalAmount    Decimal       @db.Decimal(10, 2)
+  discountAmount Decimal       @db.Decimal(10, 2)
+  taxAmount      Decimal       @db.Decimal(10, 2)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  orderItems     OrderItem[]
+
+  @@map("orders")
+  @@index([customerId])
+}
+
+model OrderItem {
+  id               Int      @id @default(autoincrement())
+  orderId          Int
+  order            Order    @relation(fields: [orderId], references: [id])
+  productVariantId Int
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Int
+  unitPrice        Decimal  @db.Decimal(10, 2)
+  discount         Decimal  @default(0)  @db.Decimal(10, 2)
+  subtotal         Decimal  @db.Decimal(10, 2)
+  createdAt        DateTime @default(now())
+
+  @@map("order_items")
+  @@index([orderId])
+  @@index([productVariantId])
+}
+
+model SystemMenuSection {
+  id Int @id @default(autoincrement())
+  name String
+  status Status @default(Active)
+  createdAt DateTime @default(now())
+  menus SystemMenu[]
+  menuSectionPermission SystemMenuSectionPermission[]
+
+  @@map("system_menu_section")
+}
+
+model SystemMenu{
+  id Int @id @default(autoincrement())
+  name String
+  sectionId Int @map("section_id")
+  section SystemMenuSection @relation(fields: [sectionId], references: [id])
+  path String
+  status Status @default(Active)
+  createdAt DateTime @default(now())
+
+  menuPermission SystemMenuPermission[]
+
+  @@map("system_menu")
+}
+
+model SystemMenuSectionPermission {
+  id Int @id @default(autoincrement())
+  userId Int @map("user_id") @default(2)
+  user User @relation(fields: [userId], references: [id])
+  sectionId Int @map("section_id")
+  section SystemMenuSection @relation(fields: [sectionId], references: [id])
+  isEnabled Boolean @default(false) @map("is_enabled")
+  createdAt DateTime @default(now())
+
+  @@map("system_menu_section_permission")
+}
+
+
+model SystemMenuPermission {
+  id Int @id @default(autoincrement())
+  userId Int @map("user_id") @default(2)
+  user User @relation(fields: [userId], references: [id])
+  menuId Int @map("menu_id")
+  menu SystemMenu @relation(fields: [menuId], references: [id])
+  canView Boolean @default(false) @map("can_view")
+  canAdd Boolean @default(false) @map("can_add")
+  canEdit Boolean @default(false) @map("can_edit")
+  createdAt DateTime @default(now())
+
+  @@map("system_menu_permission")
+}

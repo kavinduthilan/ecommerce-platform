@@ -86,7 +86,7 @@ async function main() {
     { name: "Master Data", status: Status.Active },
     { name: "Product", status: Status.Active },
     { name: "Inventory", status: Status.Active },
-    { name: "Order", status: Status.Active },
+    { name: "Orders", status: Status.Active },
     { name: "Customer", status: Status.Active },
   ];
 
@@ -101,7 +101,7 @@ async function main() {
     { name: "Top Sellers", path: "/top-sellers", section: "Product", status: Status.Active },
     { name: "Inventory", path: "/inventory", section: "Inventory", status: Status.Active },
     { name: "Stock Moves", path: "/stock-moves", section: "Inventory", status: Status.Active},
-    { name: "Order", path: "/order", section: "Order", status: Status.Active },
+    { name: "Orders", path: "/orders", section: "Order", status: Status.Active },
     { name: "Customer", path: "/customer", section: "Customer", status: Status.Active },
   ];
 

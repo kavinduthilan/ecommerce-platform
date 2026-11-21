@@ -1,6 +1,7 @@
 // import "./luxury.css";
 
 const notes = ["Oud", "Amber", "Saffron", "Rose", "Vanilla", "Sandalwood", "Bergamot", "Musk"];
+// const notes = ["AURELIA"];
 
 /** A slow 3D carousel of scent notes. Pauses on hover. */
 export default function NotesRing() {

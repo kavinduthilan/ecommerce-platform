@@ -122,6 +122,10 @@ const AppSidebar: React.FC = () => {
             .map((s) => normalize(s.name))
         );
 
+        console.log("allowed paths:", [...paths]);
+console.log("all menu paths:", menus.map((m) => m.path));
+console.log("menu perms:", userMenuPermissions);
+
         setAccess({ paths, sections: sectionNames });
       } catch (err) {
         console.error("Failed to load sidebar permissions:", err);
